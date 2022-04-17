@@ -42,18 +42,20 @@ When the containers are built, user has to create a folder named `/home/ubuntu/d
 ## Scenario Execution
 The following snippet depicts the example of 5G-Slicer demo and its programming abstractions. Lines 1-2 import the 5G-Slicer SDK and the parameterizable smart bus testbed template. In Lines 3-5, the user introduces the Fogify Controller address (experiment orchestrator) and the docker-compose file, describing the available infrastructure and network resources along with the emulation configuration. Lines 6-8 configure the testbed according to user preferences, including the number of radio units, MECs, and buses, along with the operational bounding box. The generate_experiment method produces a new SDK object that captures a programming view of the 5G-Slicer model and materializes the testbed with the mobility scenarios. Line 11 deploys the testbed, and Line 12 generates the interactive map. With the scenario_execution method in Line 13, the user can run the mobility scenario that is generated from the datasets. Finally, Line 14 finishes the emulation and releases all resources.
 ```python
-from 5GSlicerSDK import 5GSlicerSDK
-from experiment_repo import BusExperiment
-5g_slicer_sdk = 5GSlicerSDK(
-                    'http://controller:5000',
-                    'demo_files/docker-compose.yaml')
-bus_exp = BusExperiment( 
-    5g_slicer_sdk, num_of_RUs=5, num_of_edge=5, 
-    num_of_buses=10, bounding_box=(...) )
-5g_slicer_sdk = bus_exp.generate_experiment()
-5g_slicer_sdk.generate_mobile_networks()
-5g_slicer_sdk.deploy()
-5g_slicer_sdk.generate_map('dublin_network')
-5g_slicer_sdk.scenario_execution('mobility')
-5g_slicer_sdk.undeploy()
+from usecases.dublin_buses_experiment import BusExperiment
+from SlicerSDK import SlicerSDK
+bus_experiment = BusExperiment(
+    SlicerSDK("http://controller:5000", "docker-compose-demo.yaml"), # initial SlicerSDK model
+    num_of_RUs=100, # number of radio units
+    num_of_clouds=1, # number of cloud servers
+    num_of_edge=4, # number of MEC servers
+    num_of_buses=7, # number of IoT devices
+    max_num_of_trace_steps=50, # trajectories information
+    min_num_of_trace_steps=1, 
+    bus_ids=[331416615, 335096213, 360603795, 380192314, 430355076, 335862098, 335096213], # IoT ids
+    bounding_box=( 
+        (53.351627215495036, -6.294565200805664), # bounding box in which the devices will operate
+        (53.36187249371434, -6.234655380249024)),
+    seed=1) # Random seed to keep the same EDGE nodes during the experiment
+slicerSDK = bus_experiment.generate_experiment()  # creation of the experimental data
 ```
